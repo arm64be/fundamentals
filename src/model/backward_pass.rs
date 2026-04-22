@@ -4,15 +4,15 @@ use rand::Rng;
 use rand_chacha::ChaCha8Rng;
 
 use crate::{
-    model::{CFG_BIT_FLIPS, LanguageModel, N_EMBD, N_LAYER, N_PROCESS, ND_PROCESS_EMBD},
+    model::{CFG_BIT_FLIPS, LanguageModel, N_EMBD, N_LAYER, N_PROCESS},
     tokenizer::{BLOCK_COUNT, SINGLE_BLOCK_SIZE},
 };
 
 const PROJ_WIDTH: u32 = 2 + N_LAYER as u32;
 
 #[optimize(speed)]
-pub fn backward_pass(model: &mut LanguageModel, rng: &mut ChaCha8Rng) {
-    for _ in 0..CFG_BIT_FLIPS {
+pub fn backward_pass(model: &mut LanguageModel, rng: &mut ChaCha8Rng, flips: usize) {
+    for _ in 0..flips {
         match rng.next_u32().rem_euclid(PROJ_WIDTH) {
             0 => {
                 let idx = (rng.next_u32() as usize).rem_euclid(SINGLE_BLOCK_SIZE);

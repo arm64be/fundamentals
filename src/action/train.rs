@@ -1,6 +1,6 @@
 use std::{
     array,
-    ops::{BitXor, Index, IndexMut},
+    ops::{BitXor, Index, IndexMut, Mul},
     time::SystemTime,
 };
 
@@ -170,7 +170,7 @@ pub fn training_loop(_tokenizer: Tokenizer, epochs: usize, mut dataset: Vec<[u16
                 &mut rng,
             );
 
-            //#[cfg(debug_assertions)]
+            #[cfg(debug_assertions)]
             println!(
                 "{} {}/{} {}",
                 "step |".bright_red(),
@@ -211,7 +211,11 @@ fn train_step(
     model_working: &mut LanguageModel,
     rng: &mut ChaCha8Rng,
 ) {
-    backward_pass(model_working, rng);
+    backward_pass(
+        model_working,
+        rng,
+        (*lowest_loss as f64).mul(4.0).log10().floor() as usize,
+    );
 
     // NOTE: this should be auto-unrolled by llvm
     // if it isn't, make sure you're using enough optimization passes
@@ -223,7 +227,7 @@ fn train_step(
         let transform_inflate = transform_inflate_arena.index_mut(accum_idx);
         handle_sequence(
             sequence,
-            model,
+            model_working,
             fwd_embeddings,
             sequence_loss,
             transform_inflate,
@@ -233,7 +237,7 @@ fn train_step(
 
     let sum_loss: u32 = accum_loss_arena.iter().sum();
 
-    if *lowest_loss < sum_loss {
+    if *lowest_loss > sum_loss {
         *lowest_loss = sum_loss;
         model_working.clone_weights(model);
     } else {

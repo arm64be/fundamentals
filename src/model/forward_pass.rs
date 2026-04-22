@@ -1,15 +1,12 @@
 use std::{
     intrinsics::assume,
-    ops::{BitAnd, BitOr, BitXor, BitXorAssign, Index, IndexMut, Shl, Shr},
+    ops::{BitAnd, BitOr, BitXor, Index, IndexMut, Shl, Shr},
 };
 
 use crate::{
     math::u16_bitand_bitxor_assign,
     mem::endian_restrict,
-    model::{
-        CTX_FULL, LanguageModel, N_EMBD, N_LAYER, N_PROCESS, N_PROCESS_NORM, N_VOCAB,
-        ND_PROCESS_EMBD,
-    },
+    model::{CTX_FULL, LanguageModel, N_EMBD, N_PROCESS, N_PROCESS_NORM, N_VOCAB, ND_PROCESS_EMBD},
 };
 
 pub fn forward_pass(
@@ -63,10 +60,11 @@ pub fn forward_pass(
         }
 
         // TODO: this should be manually vectorized with SIMD
-        for _ in (1..attn_window).rev() {
+        for attn_idx in (1..attn_window).rev() {
+            let token = embedding_arena.index(attn_idx);
             #[allow(clippy::needless_range_loop)]
             for dim_idx in 0..N_EMBD {
-                let dim = next_token[dim_idx];
+                let dim = token[dim_idx];
                 let process = layer.process_norms[dim_idx];
                 let inflate_idx = dim_idx.strict_mul(4);
                 let causal_mask = causal_mask.index_mut(dim_idx);
