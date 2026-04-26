@@ -7,7 +7,7 @@ use std::ops::AddAssign;
 use crate::{containers::Int16Array, mem::endian_restrict};
 
 const SPECIAL_TOKEN_SET: [u8; 2] = [0, 10];
-pub const BLOCK_COUNT: usize = 4;
+pub const BLOCK_COUNT: usize = 1;
 const SINGLE_BLOCK_NO_SPECIAL_SIZE: usize = 128usize.strict_sub(32usize);
 pub const SINGLE_BLOCK_SIZE: usize =
     SINGLE_BLOCK_NO_SPECIAL_SIZE.strict_add(SPECIAL_TOKEN_SET.len()); // extended ASCII - control characters + special set

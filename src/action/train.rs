@@ -170,7 +170,7 @@ pub fn training_loop(_tokenizer: Tokenizer, epochs: usize, mut dataset: Vec<[u16
                 &mut rng,
             );
 
-            #[cfg(debug_assertions)]
+            // #[cfg(debug_assertions)]
             println!(
                 "{} {}/{} {}",
                 "step |".bright_red(),
